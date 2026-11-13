@@ -102,13 +102,47 @@
 
                         </button>
 
-                        <button
-                            type="button"
-                            class="btn btn-outline-danger">
+                        @if(in_array($activity->activity_id, $wishlistIds))
 
-                            <i class="bi bi-heart-fill"></i>
+                        <form
+                            action="{{ route('wishlist.destroy', $activity->activity_id) }}"
+                            method="POST"
+                            class="flex-fill">
 
-                        </button>
+                            @csrf
+                            @method('DELETE')
+
+                            <button
+                                type="submit"
+                                class="btn btn-danger w-100">
+                                <i class="bi bi-heart-fill me-1"></i>
+                            </button>
+
+                        </form>
+
+                    @else
+
+                        <form
+                            action="{{ route('wishlist.store') }}"
+                            method="POST"
+                            class="flex-fill">
+
+                            @csrf
+
+                            <input
+                                type="hidden"
+                                name="activity_id"
+                                value="{{ $activity->activity_id }}">
+
+                            <button
+                                type="submit"
+                                class="btn btn-outline-danger w-100">
+                                <i class="bi bi-heart me-1"></i>
+                            </button>
+
+                        </form>
+
+                    @endif
 
                     </div>
 
@@ -352,27 +386,22 @@
                             class="form-select"
                             required>
 
-                            <option value="">
+                            <option value="" disabled {{ old('itinerary_id') ? '' : 'selected' }}>
                                 Seleccione un viaje
                             </option>
 
-                            @foreach ($trips as $trip)
-                                @if ($trip->itinerary)
-                                    <option
-                                        value="{{ $trip->itinerary->itinerary_id }}"
-                                        {{ old('itinerary_id') == $trip->itinerary->itinerary_id ? 'selected' : '' }}
-                                        data-start="{{ \Carbon\Carbon::parse($trip->start_date)->format('Y-m-d') }}"
-                                        data-end="{{ \Carbon\Carbon::parse($trip->end_date)->format('Y-m-d') }}">
-
-                                        {{ $trip->title }}
-                                        (
-                                        {{ \Carbon\Carbon::parse($trip->start_date)->format('d/m/Y') }}
-                                        -
-                                        {{ \Carbon\Carbon::parse($trip->end_date)->format('d/m/Y') }}
-                                        )
-                                    </option>
-                                @endif
-                            @endforeach
+                            @forelse ($trips as $trip)
+                                <option
+                                    value="{{ $trip->itinerary->itinerary_id }}"
+                                    {{ (int) old('itinerary_id') === $trip->itinerary->itinerary_id ? 'selected' : '' }}
+                                    data-start="{{ \Carbon\Carbon::parse($trip->start_date)->format('Y-m-d') }}"
+                                    data-end="{{ \Carbon\Carbon::parse($trip->end_date)->format('Y-m-d') }}">
+                                    {{ $trip->title }}
+                                    ({{ \Carbon\Carbon::parse($trip->start_date)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($trip->end_date)->format('d/m/Y') }})
+                                </option>
+                            @empty
+                                <option value="" disabled selected>No tienes viajes con itinerarios creados</option>
+                            @endforelse
 
                         </select>
                     </div>

@@ -204,13 +204,33 @@ class ActivityController extends Controller
         ->count();
 
         $trips = Trip::with('itinerary')
+        ->whereHas('itinerary')
         ->orderBy(
             'start_date',
             'desc'
         )
         ->get();
 
-        
+         //Wishlist
+        $wishlistIds = [];
+
+        if (Auth::check()) {
+
+            $wishlist = Wishlist::where(
+                'user_id',
+                Auth::user()->user_id
+            )->first();
+
+            if ($wishlist) {
+
+                $wishlistIds = WishlistDetail::where(
+                    'wishlist_id',
+                    $wishlist->wishlist_id
+                )
+                ->pluck('activity_id')
+                ->toArray();
+            }
+        }
 
         return view(
             'activity.show',
@@ -221,6 +241,7 @@ class ActivityController extends Controller
                 'totalReviews',
                 'sort',
                 'trips',
+                'wishlistIds',
             )
         );
     }

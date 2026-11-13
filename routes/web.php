@@ -92,17 +92,22 @@ Route::get('activity/{activity_id}', [ActivityController::class, 'show'])
 
 //Reservation
 
-Route::get('trip/{trip_id}/reservations', [ReservationController::class, 'index'])
-    ->name('reservation.index');
+Route::middleware('auth')->group(function () {
+    Route::get('/reservations/{itinerary}', [ReservationController::class, 'my'])
+        ->name('reservations.my');
 
-Route::get('trip/{trip_id}/reservations/create', [ReservationController::class, 'create'])
-    ->name('reservation.create');
+    Route::get('/reservations/{itinerary}/search', [ReservationController::class, 'index'])
+        ->name('reservations.index');
 
-Route::post('reservations', [ReservationController::class, 'store'])
-    ->name('reservation.store');
+    Route::post('/reservations/search', [ReservationController::class, 'search'])
+        ->name('reservations.search');
 
-Route::delete('reservation/{reservation_id}', [ReservationController::class, 'destroy'])
-    ->name('reservation.destroy');
+    Route::post('/reservations', [ReservationController::class, 'store'])
+        ->name('reservations.store');
+
+    Route::patch('/reservations/{reservation}/cancel', [ReservationController::class, 'cancel'])
+        ->name('reservations.cancel');
+});
 
 //Itinerary
 

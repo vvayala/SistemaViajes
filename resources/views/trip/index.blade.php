@@ -60,22 +60,12 @@
 
                     <a
                         href="{{ route('itinerary.index', $trip->trip_id) }}"
-                        class="btn btn-primary btn-sm">
+                        class="btn btn-warning btn-sm fw-bold">
 
                         <i class="bi bi-map me-1"></i>
                         Itinerario
 
                     </a>
-
-                    <a
-                        href="{{ route('reservation.index', $trip->trip_id) }}"
-                        class="btn btn-primary btn-sm">
-
-                        <i class="bi bi-calendar-check me-1"></i>
-                        Reservas
-
-                    </a>
-
                     <a
                         href="{{ route('trip.edit', $trip->trip_id) }}"
                         class="btn btn-primary btn-sm">

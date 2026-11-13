@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('country', function (Blueprint $table) {
             $table->id('country_id');
             $table->string('name');
+            $table->string('iata');
             $table->timestamps();
         });
     }

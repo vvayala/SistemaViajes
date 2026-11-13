@@ -199,21 +199,9 @@ public function show(
      */
 
     if ($request->filled('season')) {
-
-        $activities->setCollection(
-
-            $activities
-                ->getCollection()
-                ->filter(function ($activity)
-                    use ($request) {
-
-                    return
-                        $activity->season_name
-                        ===
-                        $request->season;
-                })
-
-        );
+        $activities = $activities->filter(function ($activity) use ($request) {
+            return $activity->season_name === $request->season;
+        })->values();
     }
 
     /*

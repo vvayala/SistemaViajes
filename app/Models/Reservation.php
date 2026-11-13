@@ -11,30 +11,18 @@ class Reservation extends Model
     protected $primaryKey = 'reservation_id';
 
     protected $fillable = [
-        'name',
-        'price',
-        'quantity',
-        'description',
-        'trip_id',
-        'reservation_type_id',
-        'activity_id',
+        'user_id', 'origin', 'destination', 'departure_time', 'arrival_time',
+        'airline', 'flight_number', 'price', 'currency', 'passengers', 'stops', 'status', 'itinerary_id',
     ];
 
-    public function activity()
+    public function user()
     {
-        return $this->belongsTo(
-            Activity::class,
-            'activity_id',
-            'activity_id'
-        );
+        return $this->belongsTo(User::class);
     }
 
-    public function reservationType()
+    public function itinerary()
     {
-        return $this->belongsTo(
-            ReservationType::class,
-            'reservation_type_id',
-            'reservation_type_id'
-        );
+        return $this->belongsTo(Itinerary::class, 'itinerary_id', 'itinerary_id');
     }
+
 }

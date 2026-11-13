@@ -77,7 +77,7 @@
                                 <input
                                     id="telephone"
                                     type="tel"
-                                    maxlength="8"
+                                    maxlength="11"
                                     class="form-control @error('telephone') is-invalid @enderror"
                                     name="telephone"
                                     value="{{ old('telephone') }}"

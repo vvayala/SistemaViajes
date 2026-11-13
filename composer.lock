@@ -4,8 +4,77 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4c8f0fc6c970d9f72d1ba9dc66153b01",
+    "content-hash": "bc0bed19b332ddef17527b79b339dac0",
     "packages": [
+        {
+            "name": "apify/apify-client",
+            "version": "v0.14.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/apify/apify-client-php.git",
+                "reference": "ed4aa866ed497c74fd31eca722287dba6e8aecc8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/apify/apify-client-php/zipball/ed4aa866ed497c74fd31eca722287dba6e8aecc8",
+                "reference": "ed4aa866ed497c74fd31eca722287dba6e8aecc8",
+                "shasum": ""
+            },
+            "require": {
+                "ext-hash": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "guzzlehttp/guzzle": "^7.5",
+                "guzzlehttp/psr7": "^2.4",
+                "php": ">=8.1",
+                "psr/http-client": "^1.0",
+                "psr/http-factory": "^1.0",
+                "psr/http-message": "^1.1 || ^2.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.52",
+                "phpstan/phpstan": "^1.11",
+                "phpunit/phpunit": "^10.5"
+            },
+            "suggest": {
+                "ext-brotli": "Compresses request bodies with brotli, which is the default when it is loaded.",
+                "ext-intl": "Converts an internationalized host in a URL field of a response to punycode.",
+                "ext-zstd": "Compresses request bodies with zstd, with compression: 'zstd'."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Apify\\Client\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Apify",
+                    "email": "support@apify.com",
+                    "homepage": "https://apify.com"
+                }
+            ],
+            "description": "Official, experimental (AI-generated and AI-maintained) Apify API client for PHP: run Actors, manage storages (datasets, key-value stores, request queues), schedules, webhooks and more.",
+            "homepage": "https://github.com/apify/apify-client-php",
+            "keywords": [
+                "actor",
+                "api",
+                "apify",
+                "automation",
+                "client",
+                "crawler",
+                "scraping"
+            ],
+            "support": {
+                "issues": "https://github.com/apify/apify-client-php/issues",
+                "source": "https://github.com/apify/apify-client-php/tree/v0.14.0"
+            },
+            "time": "2026-11-11T07:47:10+00:00"
+        },
         {
             "name": "brick/math",
             "version": "0.14.8",

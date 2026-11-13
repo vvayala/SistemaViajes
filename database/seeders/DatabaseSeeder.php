@@ -26,7 +26,6 @@ class DatabaseSeeder extends Seeder
        $this->call([
             TripTypeSeeder::class,
             RoleSeeder::class,
-            ReservationTypeSeeder::class,
             CountrySeeder::class,
             LocationSeeder::class,
             InterestSeeder::class,

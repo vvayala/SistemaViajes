@@ -6,23 +6,25 @@
 
 <div class="container">
 
-    <div class="d-flex justify-content-between mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
 
-        <h2>
+        <h2 class="section-title mb-0">
             Itinerarios
         </h2>
 
-        @if($itineraries->isEmpty())
-
-            <a
-                href="{{ route('itinerary.create', $trip->trip_id) }}"
+        <div class="d-flex gap-2">
+            @if($itineraries->isEmpty())
+                <a href="{{ route('itinerary.create', $trip->trip_id) }}"
                 class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i> Nuevo Itinerario
+                </a>
+            @endif
 
-                Nuevo Itinerario
-
+            <a href="{{ route('trip.index') }}"
+            class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Volver
             </a>
-
-        @endif
+        </div>
 
     </div>
 
@@ -57,6 +59,10 @@
                 </div>
 
                 <div class="d-flex gap-2">
+                    <a href="{{ route('itinerary.show', $itinerary->itinerary_id) }}"
+                        class="btn btn-primary btn-sm">
+                            Ver
+                        </a>
                     <a
                         href="{{ route('itinerary.edit', $itinerary->itinerary_id) }}"
                         class="btn btn-sm btn-primary">

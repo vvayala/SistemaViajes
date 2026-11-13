@@ -13,13 +13,19 @@ return new class extends Migration
     {
         Schema::create('reservation', function (Blueprint $table) {
             $table->id('reservation_id');
-            $table->string('name');
-            $table->decimal('price',8,2);
-            $table->integer('quantity');
-            $table->text('description');
-            $table->foreignId('trip_id')->references('trip_id')->on('trip')->constrained();
-            $table->foreignId('reservation_type_id')->references('reservation_type_id')->on('reservation_type');
-            $table->foreignId('activity_id')->nullable()->constrained('activity', 'activity_id');
+            $table->foreignId('user_id')->references('user_id')->on('user')->cascadeOnDelete();
+            $table->string('origin');
+            $table->string('destination');
+            $table->dateTime('departure_time');
+            $table->dateTime('arrival_time');
+            $table->string('airline')->nullable();
+            $table->string('flight_number')->nullable();
+            $table->decimal('price', 10, 2);
+            $table->string('currency', 3)->default('USD');
+            $table->integer('passengers')->default(1);
+            $table->integer('stops')->default(0);
+            $table->string('status')->default('pending'); // pending, confirmed, cancelled
+            $table->foreignId('itinerary_id')->references('itinerary_id')->on('itinerary')->cascadeOnDelete();
             $table->timestamps();
         });
     }

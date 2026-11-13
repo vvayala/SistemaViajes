@@ -17,27 +17,32 @@ class Itinerary extends Model
     ];
 
     public function activities()
-{
-    return $this->belongsToMany(
-        Activity::class,
-        'itinerary_activity',
-        'itinerary_id',
-        'activity_id'
-    )
-    ->withPivot([
-        'itinerary_activity_id',
-        'start_time',
-        'end_time'
-    ]);
-}
+    {
+        return $this->belongsToMany(
+            Activity::class,
+            'itinerary_activity',
+            'itinerary_id',
+            'activity_id'
+        )
+        ->withPivot([
+            'itinerary_activity_id',
+            'start_time',
+            'end_time'
+        ]);
+    }
 
-public function trip()
-{
-    return $this->belongsTo(
-        Trip::class,
-        'trip_id',
-        'trip_id'
-    );
-}
+    public function trip()
+    {
+        return $this->belongsTo(
+            Trip::class,
+            'trip_id',
+            'trip_id'
+        );
+    }
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'itinerary_id', 'itinerary_id');
+    }
 
 }

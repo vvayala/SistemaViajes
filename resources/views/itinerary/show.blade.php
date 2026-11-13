@@ -36,6 +36,11 @@
 
     {{-- CABECERA --}}
 
+    <a href="{{ route('trip.index')}}"
+        class="btn btn-primary btn-sm mb-2">
+        Volver
+    </a>
+
     <div class="card shadow-sm border-0 mb-4">
 
         <div class="card-body">
@@ -63,6 +68,17 @@
 
                     </span>
 
+                   <div class="mt-3 d-flex gap-2 flex-wrap">
+                        <a href="{{ route('reservations.my', $itinerary->itinerary_id) }}"
+                        class="btn btn-warning btn-sm fw-bold">
+                            <i class="bi bi-ticket-perforated me-1"></i> Mis reservas
+                        </a>
+
+                        <a href="{{ route('reservations.index', $itinerary->itinerary_id) }}"
+                        class="btn btn-primary btn-sm">
+                            <i class="bi bi-airplane me-1"></i> Nueva reserva
+                        </a>
+                    </div>
                 </div>
         </div>
 
@@ -320,6 +336,11 @@
 
                     <div class="col-md-4">
 
+                        <label class="form-label small fw-semibold">
+                            <i class="bi bi-geo-alt-fill me-1"></i>
+                            País
+                        </label>
+
                         <select
                             name="country_id"
                             class="form-select">
@@ -346,6 +367,11 @@
 
                     <div class="col-md-4">
 
+                    <label class="form-label small fw-semibold">
+                        <i class="bi bi-wallet2 me-1"></i>
+                        Presupuesto
+                    </label>
+
                         <select
                             name="budget_type_id"
                             class="form-select">
@@ -371,6 +397,11 @@
                     </div>
 
                     <div class="col-md-2">
+
+                        <label class="form-label small fw-semibold">
+                            <i class="bi bi-calendar3 me-1"></i>
+                            Temporada
+                        </label>
 
                         <select
                             name="season"
@@ -412,11 +443,15 @@
                     <div class="col-md-2">
 
                         <button
-                            class="btn btn-primary w-100">
+                            class="btn btn-primary w-100 mb-2">
 
                             Filtrar
 
                         </button>
+
+                        <a href="{{ url()->current() }}" class="btn btn-outline-secondary w-100">
+                            Limpiar
+                        </a>
 
                     </div>
 

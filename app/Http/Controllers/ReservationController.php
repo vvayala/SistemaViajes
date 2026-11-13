@@ -2,171 +2,137 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\ItineraryActivity;
+use App\Models\Itinerary;
 use App\Models\Reservation;
-use App\Models\Trip;
+use App\Services\FlightService;
 use Illuminate\Http\Request;
-use App\Models\ReservationType;
 
 class ReservationController extends Controller
 {
-    public function index($trip_id)
+    public function __construct(private FlightService $flightService)
     {
-        $trip = Trip::findOrFail($trip_id);
-
-        $reservations = Reservation::with([
-            'activity',
-            'reservationType'
-        ])
-        ->where(
-            'trip_id',
-            $trip_id
-        )
-        ->orderBy('reservation_type_id')
-        ->get();
-
-        $totalAmount = $reservations->sum(function ($reservation) {
-            return $reservation->price * $reservation->quantity;
-        });
-
-        return view(
-            'reservation.index',
-            compact(
-                'trip',
-                'reservations',
-                'totalAmount'
-            )
-        );
     }
 
-    public function create($trip_id)
+    public function my($itinerary_id)
     {
-        $trip = Trip::findOrFail($trip_id);
+        $itinerary = Itinerary::where('itinerary_id', $itinerary_id)
+            ->whereHas('trip', fn ($q) => $q->where('user_id', auth()->id()))
+            ->firstOrFail();
 
-        $activities = ItineraryActivity::query()
-            ->join(
-                'itinerary',
-                'itinerary.itinerary_id',
-                '=',
-                'itinerary_activity.itinerary_id'
-            )
-            ->join(
-                'activity',
-                'activity.activity_id',
-                '=',
-                'itinerary_activity.activity_id'
-            )
-            ->where(
-                'itinerary.trip_id',
-                $trip_id
-            )
-            ->select(
-                'activity.activity_id',
-                'activity.name'
-            )
-            ->distinct()
-            ->orderBy('activity.name')
+        $reservations = Reservation::with('itinerary')
+            ->where('user_id', auth()->id())
+            ->where('itinerary_id', $itinerary_id)
+            ->latest('reservation_id')
             ->get();
 
-        $reservationTypes = ReservationType::orderBy(
-            'name'
-        )->get();
-
-        return view(
-            'reservation.create',
-            compact(
-                'trip',
-                'activities',
-                'reservationTypes'
-            )
-        );
+        return view('reservations.my', compact('reservations', 'itinerary'));
     }
+
+    public function index($itinerary_id)
+    {
+        $itinerary = Itinerary::with(['activities.location.country'])
+            ->where('itinerary_id', $itinerary_id)
+            ->whereHas('trip', fn ($q) => $q->where('user_id', auth()->id()))
+            ->firstOrFail();
+
+        $countries = $itinerary->activities
+            ->pluck('location.country')
+            ->filter()
+            ->unique('country_id')
+            ->filter(fn ($country) => ! empty($country->iata))
+            ->values();
+
+        return view('reservations.index', compact('itinerary', 'countries'));
+    }
+
+    public function search(Request $request)
+    {
+        $validated = $request->validate([
+            'itinerary_id' => 'required|exists:itinerary,itinerary_id',
+            'origin'       => 'required|string|size:3',
+            'destination'  => 'required|string|size:3|different:origin',
+            'date'         => 'required|date|after_or_equal:today',
+            'passengers'   => 'required|integer|min:1|max:9',
+        ]);
+
+        $itinerary = Itinerary::with(['activities.location.country'])
+            ->where('itinerary_id', $validated['itinerary_id'])
+            ->whereHas('trip', fn ($q) => $q->where('user_id', auth()->id()))
+            ->firstOrFail();
+
+        $allowedIatas = $itinerary->activities
+            ->pluck('location.country.iata')
+            ->filter()
+            ->unique()
+            ->values();
+
+        if (! $allowedIatas->contains($validated['origin'])
+            || ! $allowedIatas->contains($validated['destination'])) {
+            return back()
+                ->withErrors(['origin' => 'Debes elegir países de las actividades de este itinerario.'])
+                ->withInput();
+        }
+
+        $flights = $this->flightService->search(
+            $validated['origin'],
+            $validated['destination'],
+            $validated['date'],
+            (string) $validated['passengers'],
+        );
+
+        return view('reservations.results', compact('flights', 'validated', 'itinerary'));
+    }
+
+    
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|max:255',
-            'price' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:1',
-            'description' => 'nullable',
-            'trip_id' => 'required|exists:trip,trip_id',
-            'reservation_type_id' =>
-                'required|exists:reservation_type,reservation_type_id',
-            'activity_id' =>
-                'nullable|exists:activity,activity_id',
+        $validated = $request->validate([
+            'itinerary_id'   => 'required|exists:itinerary,itinerary_id',
+            'origin'         => 'required|string|size:3',
+            'destination'    => 'required|string|size:3',
+            'departure_time' => 'required|date',
+            'arrival_time'   => 'required|date|after:departure_time',
+            'airline'        => 'nullable|string|max:255',
+            'flight_number'  => 'nullable|string|max:50',
+            'price'          => 'required|numeric|min:0',
+            'currency'       => 'required|string|size:3',
+            'passengers'     => 'required|integer|min:1',
+            'stops'          => 'required|integer|min:0',
         ]);
 
-        if ($request->filled('activity_id')) {
-
-            $exists = ItineraryActivity::query()
-                ->join(
-                    'itinerary',
-                    'itinerary.itinerary_id',
-                    '=',
-                    'itinerary_activity.itinerary_id'
-                )
-                ->where(
-                    'itinerary.trip_id',
-                    $request->trip_id
-                )
-                ->where(
-                    'itinerary_activity.activity_id',
-                    $request->activity_id
-                )
-                ->exists();
-
-            if (!$exists) {
-
-                return back()
-                    ->withInput()
-                    ->withErrors([
-                        'activity_id' =>
-                            'La actividad seleccionada no pertenece al itinerario del viaje.'
-                    ]);
-            }
-        }
+        // Autorización: el itinerario debe pertenecer al usuario
+        $itinerary = Itinerary::where('itinerary_id', $validated['itinerary_id'])
+            ->whereHas('trip', fn ($q) => $q->where('user_id', auth()->id()))
+            ->firstOrFail();
 
         Reservation::create([
-            'name' => $request->name,
-            'price' => $request->price,
-            'quantity' => $request->quantity,
-            'description' => $request->description,
-            'trip_id' => $request->trip_id,
-            'reservation_type_id' => $request->reservation_type_id,
-            'activity_id' => $request->activity_id,
+            'user_id'        => auth()->id(),
+            'itinerary_id'   => $itinerary->itinerary_id,
+            'origin'         => $validated['origin'],
+            'destination'    => $validated['destination'],
+            'departure_time' => $validated['departure_time'],
+            'arrival_time'   => $validated['arrival_time'],
+            'airline'        => $validated['airline'] ?? null,
+            'flight_number'  => $validated['flight_number'] ?? null,
+            'price'          => $validated['price'],
+            'currency'       => $validated['currency'],
+            'passengers'     => $validated['passengers'],
+            'stops'          => $validated['stops'],
+            'status'         => 'pending',
         ]);
 
         return redirect()
-            ->route(
-                'reservation.index',
-                $request->trip_id
-            )
-            ->with(
-                'success',
-                'Reserva registrada correctamente.'
-            );
+            ->route('reservations.my', $itinerary->itinerary_id)
+            ->with('success', 'Reserva creada correctamente.');
     }
 
-    public function destroy($reservation_id)
+    public function cancel(Reservation $reservation)
     {
-        $reservation = Reservation::findOrFail(
-            $reservation_id
-        );
+        abort_unless($reservation->user_id === auth()->id(), 403);
 
-        $tripId = $reservation->trip_id;
+        $reservation->update(['status' => 'cancelled']);
 
-        $reservation->delete();
-
-        return redirect()
-            ->route(
-                'reservation.index',
-                $tripId
-            )
-            ->with(
-                'success',
-                'Reserva eliminada correctamente.'
-            );
+        return back()->with('success', 'Reserva cancelada.');
     }
-
 }
