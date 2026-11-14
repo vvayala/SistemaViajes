@@ -26,7 +26,7 @@ class WeatherService
             return $cached;
         }
 
-        $response = Http::get(
+        $response = Http::timeout(30)->get(
             'https://api.open-meteo.com/v1/forecast',
             [
                 'latitude' => $latitude,
