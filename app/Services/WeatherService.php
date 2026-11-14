@@ -20,24 +20,41 @@ class WeatherService
                 $longitude
             );
 
-        return Cache::remember(
-            $cacheKey,
-            now()->addHours(1),
-            function () use (
-                $latitude,
-                $longitude
-            ) {
+        $cached = Cache::get($cacheKey);
 
-                return Http::get(
-                    'https://api.open-meteo.com/v1/forecast',
-                    [
-                        'latitude' => $latitude,
-                        'longitude' => $longitude,
-                        'current' => 'temperature_2m,weather_code',
-                    ]
-                )->json();
+        if ($cached) {
+            return $cached;
+        }
 
-            }
+        $response = Http::get(
+            'https://api.open-meteo.com/v1/forecast',
+            [
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+                'current' => 'temperature_2m,weather_code',
+            ]
         );
+
+        if (!$response->successful()) {
+            return null;
+        }
+
+        $weather = $response->json();
+
+        if (
+            !isset($weather['current'])
+            ||
+            !isset($weather['current']['temperature_2m'])
+        ) {
+            return null;
+        }
+
+        Cache::put(
+            $cacheKey,
+            $weather,
+            now()->addHours(1)
+        );
+
+        return $weather;
     }
 }
