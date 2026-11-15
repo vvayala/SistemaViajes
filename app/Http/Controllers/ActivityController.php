@@ -204,6 +204,10 @@ class ActivityController extends Controller
         ->count();
 
         $trips = Trip::with('itinerary')
+        ->where(
+            'user_id',
+            Auth::user()->user_id
+        )
         ->whereHas('itinerary')
         ->orderBy(
             'start_date',
