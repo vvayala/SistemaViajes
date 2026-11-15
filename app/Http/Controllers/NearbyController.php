@@ -75,11 +75,11 @@ class NearbyController extends Controller
                     ]
                 )
                 ->orderBy('distance')
-                ->limit(20);
+                ->limit(7);
 
         } else {
 
-            $query->limit(20);
+            $query->limit(7);
 
         }
 
